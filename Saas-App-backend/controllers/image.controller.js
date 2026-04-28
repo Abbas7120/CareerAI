@@ -57,18 +57,23 @@ async function callAiService(endpoint, payload) {
 const { removeBGFromHF } = require("../services/hfService");
 
 exports.removeBackground = async (req, res) => {
-  try {
-    const file = req.file;
+ try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No image uploaded" });
+    }
 
-    const base64 = file.buffer.toString("base64");
+    // convert buffer → base64
+    const base64 = req.file.buffer.toString("base64");
 
+    // call huggingface API
     const result = await removeBGFromHF(base64);
 
+    // send image back
     res.set("Content-Type", "image/png");
     res.send(result);
 
   } catch (err) {
-    console.error(err);
+    console.error("BG ERROR:", err);
     res.status(500).json({ error: "AI processing failed" });
   }
 };

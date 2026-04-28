@@ -1,16 +1,31 @@
-const axios = require("axios");
+const fetch = require("node-fetch");
+const FormData = require("form-data");
 
-async function removeBGFromHF(imageBase64) {
-  const response = await axios.post(
-    "https://gullubaba-career-ai.hf.space/run/predict",
-    {
-      data: [`data:image/png;base64,${imageBase64}`]
+const HF_URL = "https://kar113456-careerai.hf.space/remove-bg"; // <-- your HF URL
+
+exports.removeBGFromHF = async (base64) => {
+  try {
+    const buffer = Buffer.from(base64, "base64");
+
+    const formData = new FormData();
+    formData.append("image", buffer, {
+      filename: "image.png",
+      contentType: "image/png",
+    });
+
+    const response = await fetch(HF_URL, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HF API failed: ${response.status}`);
     }
-  );
 
-  const resultBase64 = response.data.data[0].split(",")[1];
+    return await response.buffer(); // return image buffer
 
-  return Buffer.from(resultBase64, "base64");
-}
-
-module.exports = { removeBGFromHF };
+  } catch (err) {
+    console.error("HF SERVICE ERROR:", err);
+    throw err;
+  }
+};

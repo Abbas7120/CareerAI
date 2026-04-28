@@ -14,6 +14,8 @@ const upload = multer({
 
 const {removeBackground}=require("../controllers/image.controller.js")
 const {headshotGenerator}=require("../controllers/image.controller.js")
-router.post("/remove-bg",upload.single("image"), removeBackground);
+// router.post("/remove-bg",upload.single("image"), removeBackground);
+
+router.post("/bg-removal", upload.single("image"), removeBackground);
 router.post("/headshot",upload.single("image"), headshotGenerator);
 module.exports=router
