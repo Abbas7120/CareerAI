@@ -74,7 +74,7 @@ const processImage = async () => {
     const formData = new FormData();
     formData.append("image", uploadBlob, "image.jpg");
 
-    const res = await fetch(`${API_BASE}/api/image/bg-removal`, {
+    const res = await fetch(`${API_BASE}/bg-removal`, {
       method: "POST",
       body: formData,
     });
