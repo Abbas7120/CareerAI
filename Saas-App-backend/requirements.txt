@@ -1,7 +1,8 @@
 flask
 flask-cors
-rembg
+rembg[cpu]
 pillow
 spacy
 opencv-python-headless
 numpy
+onnxruntime
