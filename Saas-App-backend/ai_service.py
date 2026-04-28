@@ -458,5 +458,5 @@ if __name__ == "__main__":
     print("[CareerAI] Pre-loading U2-Net model...")
     get_bg_remover()  # load model at startup, not on first request
     print("[CareerAI] Model ready!")
-    port = int(os.environ.get("PORT", 5001))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port, debug=False)
