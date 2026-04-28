@@ -6,3 +6,4 @@ spacy
 opencv-python-headless
 numpy
 onnxruntime
+gradio

@@ -30,31 +30,48 @@ async function callAiService(endpoint, payload) {
  
   return data;
 }
-exports.removeBackground=async(req,res)=>{
-    try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Please upload an image file" });
-    }
+// exports.removeBackground=async(req,res)=>{
+//     try {
+//     if (!req.file) {
+//       return res.status(400).json({ error: "Please upload an image file" });
+//     }
  
-    const imageDataUri = bufferToDataUri(req.file.buffer, req.file.mimetype);
+//     const imageDataUri = bufferToDataUri(req.file.buffer, req.file.mimetype);
  
-    const result = await callAiService("/api/remove-bg", { image: imageDataUri });
+//     const result = await callAiService("/api/remove-bg", { image: imageDataUri });
  
-    return res.json({
-      success: true,
-      image: result.image,   // transparent PNG as data URI
-      message: "Background removed successfully",
-    });
+//     return res.json({
+//       success: true,
+//       image: result.image,   // transparent PNG as data URI
+//       message: "Background removed successfully",
+//     });
  
-  } catch (err) {
-    console.error("[remove-bg]", err.message);
-    return res.status(500).json({
-      error: "Background removal failed",
-      detail: err.message,
-    });
-  }
-}
+//   } catch (err) {
+//     console.error("[remove-bg]", err.message);
+//     return res.status(500).json({
+//       error: "Background removal failed",
+//       detail: err.message,
+//     });
+//   }
+// }
+const { removeBGFromHF } = require("../services/hfService");
 
+exports.removeBackground = async (req, res) => {
+  try {
+    const file = req.file;
+
+    const base64 = file.buffer.toString("base64");
+
+    const result = await removeBGFromHF(base64);
+
+    res.set("Content-Type", "image/png");
+    res.send(result);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "AI processing failed" });
+  }
+};
 
 exports.headshotGenerator=async(req,res)=>{
      try {
