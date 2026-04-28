@@ -1,5 +1,7 @@
 require("dotenv").config()
 
+const PORT=process.env.PORT || 5000
+
 const express = require("express")
 const cors = require("cors")
 
@@ -12,7 +14,7 @@ const aboutRoutes = require("./routes/about.routes")
 const imageRoutes = require("./routes/image.routes")
 const app = express()
 
-app.use(cors())
+app.use(cors({origin: "*"}))
 app.use(express.json())
 
 app.use("/api/resumes",resumeRoutes)
@@ -27,8 +29,8 @@ async function start(){
 
 await initDB()
 
-app.listen(5000,()=>{
-console.log("Server running on 5000")
+app.listen(PORT,()=>{
+console.log(`Server running on port ${PORT}`)
 })
 
 }
