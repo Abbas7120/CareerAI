@@ -1,9 +1,9 @@
 const express = require("express");
 
-// const fetch = require("node-fetch");   // npm install node-fetch@2
+ const fetch = require("node-fetch");   // npm install node-fetch@2
 
  
-const AI_SERVICE_URL =  "http://localhost:5001";
+const AI_SERVICE_URL =  "https://kar113456-careerai.hf.space";
  
 // Multer config — accept images up to 10 MB in memory
 
@@ -58,54 +58,62 @@ const { removeBGFromHF } = require("../services/hfService");
 
 exports.removeBackground = async (req, res) => {
  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No image uploaded" });
-    }
-
-    // convert buffer → base64
     const base64 = req.file.buffer.toString("base64");
 
-    // call huggingface API
-    const result = await removeBGFromHF(base64);
+    const result = await callAiService("/api/remove-bg", {
+      image: base64
+    });
 
-    // send image back
-    res.set("Content-Type", "image/png");
-    res.send(result);
+    res.json(result);
 
   } catch (err) {
-    console.error("BG ERROR:", err);
-    res.status(500).json({ error: "AI processing failed" });
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.headshotGenerator=async(req,res)=>{
-     try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Please upload an image file" });
-    }
+  //    try {
+  //   if (!req.file) {
+  //     return res.status(400).json({ error: "Please upload an image file" });
+  //   }
  
-    const VALID_STYLES = ["linkedin", "professional", "white", "dark", "gradient_blue"];
-    const style = VALID_STYLES.includes(req.body.style) ? req.body.style : "professional";
+  //   const VALID_STYLES = ["linkedin", "professional", "white", "dark", "gradient_blue"];
+  //   const style = VALID_STYLES.includes(req.body.style) ? req.body.style : "professional";
  
-    const imageDataUri = bufferToDataUri(req.file.buffer, req.file.mimetype);
+  //   const imageDataUri = bufferToDataUri(req.file.buffer, req.file.mimetype);
  
+  //   const result = await callAiService("/api/headshot", {
+  //     image: imageDataUri,
+  //     style,
+  //   });
+ 
+  //   return res.json({
+  //     success: true,
+  //     image: result.image,   // enhanced portrait as JPEG data URI
+  //     style: result.style,
+  //     message: "Professional headshot generated",
+  //   });
+ 
+  // } catch (err) {
+  //   console.error("[headshot]", err.message);
+  //   return res.status(500).json({
+  //     error: "Headshot generation failed",
+  //     detail: err.message,
+  //   });
+  // }
+  try{
+    const base64 = req.file.buffer.toString("base64");
+
     const result = await callAiService("/api/headshot", {
-      image: imageDataUri,
-      style,
+      image: base64,
+      style: req.body.style || "professional"
     });
- 
-    return res.json({
-      success: true,
-      image: result.image,   // enhanced portrait as JPEG data URI
-      style: result.style,
-      message: "Professional headshot generated",
-    });
- 
+
+    res.json(result);
+
   } catch (err) {
-    console.error("[headshot]", err.message);
-    return res.status(500).json({
-      error: "Headshot generation failed",
-      detail: err.message,
-    });
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 }

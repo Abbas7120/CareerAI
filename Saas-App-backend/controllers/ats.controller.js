@@ -55,10 +55,9 @@
 //   }
 
 // }
+ const fetch = require("node-fetch");
 
-// const fetch = require("node-fetch");
-
-const AI_SERVICE_URL = "http://localhost:5001";
+const AI_SERVICE_URL = "https://kar113456-careerai.hf.space";
 
 async function callAiService(endpoint, payload) {
   const response = await fetch(`${AI_SERVICE_URL}${endpoint}`, {
