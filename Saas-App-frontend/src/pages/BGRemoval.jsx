@@ -68,11 +68,18 @@ export default function BGRemoval() {
       method: "POST",
       body: formData,
     });
+if (!res.ok) {
+  throw new Error("Processing failed");
+}
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || "Processing failed");
+const blob = await res.blob();
+const imageUrl = URL.createObjectURL(blob);
 
-      setResultImage(data.image);
+setResultImage(imageUrl);
+      // const data = await res.json();
+      // if (!res.ok || !data.success) throw new Error(data.error || "Processing failed");
+
+      // setResultImage(data.image);
     } catch (err) {
       setError(err.message);
     } finally {
