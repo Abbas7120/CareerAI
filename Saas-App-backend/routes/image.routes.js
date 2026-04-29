@@ -1,5 +1,5 @@
-const express=require('express')
-const router=express.Router()
+const express = require('express')
+const router = express.Router()
 const multer = require("multer");
 
 const upload = multer({
@@ -13,8 +13,9 @@ const upload = multer({
   },
 });
 
-const {removeBackground}=require("../controllers/image.controller.js")
-const {headshotGenerator}=require("../controllers/image.controller.js")
-router.post("/remove-bg",upload.single("image"), removeBackground);
-router.post("/headshot",upload.single("image"), headshotGenerator);
-module.exports=router
+const { removeBackground, generateHeadshot } = require("../controllers/image.controller.js")
+
+router.post("/remove-bg", upload.single("image"), removeBackground);
+router.post("/headshot", upload.single("image"), generateHeadshot);  // ← was headshotGenerator
+
+module.exports = router
