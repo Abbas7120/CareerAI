@@ -159,7 +159,7 @@ const processImage = async () => {
                   <span className="w-2 h-2 rounded-full bg-green-400"></span>
                   <span className="text-sm font-medium text-gray-600">Background Removed</span>
                 </div>
-                <div className="p-4 min-h-[200px] flex items-center justify-center"
+                <div className="p-4 min-h-50 flex items-center justify-center"
                   style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23e5e7eb'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23e5e7eb'/%3E%3C/svg%3E\")" }}>
                   {resultImage ? (
                     <img src={resultImage} alt="Result" className="w-full rounded-lg object-contain max-h-64" />
