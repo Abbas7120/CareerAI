@@ -1,63 +1,6 @@
-// const AI_SERVICE_URL =  "http://localhost:5001";
-// async function callAiService(endpoint, payload) {
-//   const response = await fetch(`${AI_SERVICE_URL}${endpoint}`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(payload),
-//     timeout: 300000, // 60s — model inference can take a moment
-//   });
- 
-//   const data = await response.json();
- 
-//   if (!response.ok || data.error) {
-//     throw new Error(data.error || `AI service returned ${response.status}`);
-//   }
- 
-//   return data;
-// }
+const fetch = require("node-fetch");
 
-// exports.analyzeResume = async(req,res)=>{
-
-// try {
-//     const { resume, jobDescription } = req.body;
- 
-//     if (!resume || !jobDescription) {
-//       return res.status(400).json({
-//         error: "Both 'resume' and 'jobDescription' fields are required",
-//       });
-//     }
- 
-//     if (resume.trim().length < 50) {
-//       return res.status(400).json({ error: "Resume text is too short (minimum 50 characters)" });
-//     }
- 
-//     if (jobDescription.trim().length < 30) {
-//       return res.status(400).json({ error: "Job description is too short (minimum 30 characters)" });
-//     }
- 
-//     const result = await callAiService("/api/ats-check", { resume, jobDescription });
- 
-//     return res.json({
-//       success: true,
-//       score: result.score,
-//       breakdown: result.breakdown,
-//       matchedKeywords: result.matchedKeywords,
-//       missingKeywords: result.missingKeywords,
-//       suggestions: result.suggestions,
-//     });
- 
-//   } catch (err) {
-//     console.error("[ats-check]", err.message);
-//     return res.status(500).json({
-//       error: "ATS analysis failed",
-//       detail: err.message,
-//     });
-//   }
-
-// }
- const fetch = require("node-fetch");
-
-const AI_SERVICE_URL = "https://kar113456-careerai.hf.space";
+const AI_SERVICE_URL = "http://localhost:5001";
 
 async function callAiService(endpoint, payload) {
   const response = await fetch(`${AI_SERVICE_URL}${endpoint}`, {
