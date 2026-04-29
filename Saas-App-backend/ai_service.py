@@ -74,27 +74,28 @@ def remove_bg():
             raw = raw.split(",", 1)[1]
         img_bytes = base64.b64decode(raw)
 
-        # Resize to max 1024px before sending to save bandwidth & avoid HF limits
+        # Resize before sending
         pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-        MAX = 1024
-        if max(pil.size) > MAX:
-            pil.thumbnail((MAX, MAX), Image.LANCZOS)
+        pil.thumbnail((1024, 1024), Image.LANCZOS)
         buf = io.BytesIO()
         pil.save(buf, format="JPEG", quality=90)
         buf.seek(0)
         resized_bytes = buf.read()
 
+        # Get PNG bytes back from remove.bg
         result_bytes = call_hf_remove_bg(resized_bytes)
 
+        # ── THIS IS THE CRITICAL PART ──
+        # Convert raw PNG bytes → base64 string for frontend
         result_b64 = base64.b64encode(result_bytes).decode("utf-8")
+
         return jsonify({
             "success": True,
-            "image": f"data:image/png;base64,{result_b64}",
+            "image": f"data:image/png;base64,{result_b64}",  # must have this prefix
         })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FEATURE 2 — ATS CHECKER  (local spaCy NLP — lightweight, no GPU needed)
