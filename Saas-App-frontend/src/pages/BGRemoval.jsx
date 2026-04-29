@@ -49,28 +49,17 @@ const processImage = async () => {
     await new Promise(r => (img.onload = r));
 
     const MAX = 1024;
-    let w = img.width,
-      h = img.height;
-
+    let w = img.width, h = img.height;
     if (w > MAX || h > MAX) {
-      if (w > h) {
-        h = Math.round((h * MAX) / w);
-        w = MAX;
-      } else {
-        w = Math.round((w * MAX) / h);
-        h = MAX;
-      }
+      if (w > h) { h = Math.round((h * MAX) / w); w = MAX; }
+      else { w = Math.round((w * MAX) / h); h = MAX; }
     }
 
     canvas.width = w;
     canvas.height = h;
     canvas.getContext("2d").drawImage(img, 0, 0, w, h);
 
-    // ✅ renamed (was blob)
-    const uploadBlob = await new Promise((r) =>
-      canvas.toBlob(r, "image/jpeg", 0.85)
-    );
-
+    const uploadBlob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.85));
     const formData = new FormData();
     formData.append("image", uploadBlob, "image.jpg");
 
@@ -79,15 +68,11 @@ const processImage = async () => {
       body: formData,
     });
 
-    if (!res.ok) {
-      throw new Error("Processing failed");
-    }
+    // ✅ CORRECT — parse as JSON, then use data.image directly
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || "Processing failed");
 
-    // ✅ renamed (was blob again)
-    const resultBlob = await res.blob();
-    const imageUrl = URL.createObjectURL(resultBlob);
-
-    setResultImage(imageUrl);
+    setResultImage(data.image); // data.image is already "data:image/png;base64,..."
 
   } catch (err) {
     setError(err.message);
