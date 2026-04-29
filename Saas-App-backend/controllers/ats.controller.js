@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const AI_SERVICE_URL = "http://localhost:5001";
+const AI_SERVICE_URL = "https://careerai-1-lwj8.onrender.com";
 
 async function callAiService(endpoint, payload) {
   const response = await fetch(`${AI_SERVICE_URL}${endpoint}`, {
