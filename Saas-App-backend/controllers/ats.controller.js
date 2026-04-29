@@ -1,4 +1,4 @@
-const fetch = require("node-fetch");
+//const fetch = require("node-fetch");
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "https://careerai-1-lwj8.onrender.com";
 

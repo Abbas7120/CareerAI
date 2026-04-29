@@ -1,4 +1,4 @@
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
 
 // This is the URL of your Python ai_service.py deployed on Render
 // Set this in your Render environment variables as AI_SERVICE_URL
