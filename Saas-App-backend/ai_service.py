@@ -127,37 +127,53 @@ STOP_WORDS = {
     "had","do","does","did","will","would","could","should","may","might",
     "shall","can","not","no","but","if","then","that","this","it","its",
     "we","i","you","they","he","she","our","their","your","my","his","her",
+    "also","more","other","into","through","during","before","after","about",
+    "between","out","over","under","again","once","here","there","when",
+    "where","why","how","all","both","each","few","more","most","some",
+    "such","than","too","very","just","because","while","although","however",
 }
 
+def tokenize(text):
+    """Pure Python tokenizer — splits on non-alphanumeric, removes stop words."""
+    words = re.findall(r'\b[a-zA-Z][a-zA-Z0-9\+\#\.]*\b', text.lower())
+    return [w for w in words if w not in STOP_WORDS and len(w) > 2]
+
 def extract_keywords(text):
-    nlp = get_nlp()
-    doc = nlp(text.lower())
+    """Extract keywords using pure Python — no NLP library needed."""
     keywords = set()
-    for chunk in doc.noun_chunks:
-        phrase = chunk.text.strip()
-        if len(phrase) > 2 and phrase not in STOP_WORDS:
-            keywords.add(phrase)
-    for ent in doc.ents:
-        if ent.label_ in ("ORG", "PRODUCT", "GPE"):
-            keywords.add(ent.text.lower().strip())
-    for token in doc:
-        if not token.is_stop and not token.is_punct and token.pos_ in ("NOUN","PROPN","VERB") and len(token.text) > 2:
-            keywords.add(token.lemma_.lower())
     text_lower = text.lower()
+
+    # Match known tech skills first (handles multi-word like "machine learning")
     for skill in TECH_SKILLS:
         if skill in text_lower:
             keywords.add(skill)
+
+    # Extract meaningful single words
+    tokens = tokenize(text)
+    freq = Counter(tokens)
+    # Keep words that appear at least once and are meaningful length
+    for word, count in freq.items():
+        if len(word) > 3:
+            keywords.add(word)
+
+    # Extract 2-word phrases (bigrams) that appear in the text
+    words = re.findall(r'\b[a-z][a-z0-9]*\b', text_lower)
+    for i in range(len(words) - 1):
+        if words[i] not in STOP_WORDS and words[i+1] not in STOP_WORDS:
+            bigram = f"{words[i]} {words[i+1]}"
+            if len(bigram) > 6:
+                keywords.add(bigram)
+
     return keywords
 
 def tfidf_similarity(r, j):
-    def freq(text):
-        words = re.findall(r'\b[a-z]{2,}\b', text.lower())
-        f = {}
-        for w in words:
-            if w not in STOP_WORDS:
-                f[w] = f.get(w, 0) + 1
+    """Cosine similarity using pure Python TF-IDF."""
+    def word_freq(text):
+        words = tokenize(text)
+        f = Counter(words)
         return f
-    rf, jf = freq(r), freq(j)
+
+    rf, jf = word_freq(r), word_freq(j)
     all_w = set(rf) | set(jf)
     dot = sum(rf.get(w, 0) * jf.get(w, 0) for w in all_w)
     mr = math.sqrt(sum(v**2 for v in rf.values()))
@@ -165,23 +181,31 @@ def tfidf_similarity(r, j):
     return dot / (mr * mj) if mr and mj else 0.0
 
 def calculate_ats_score(resume_text, jd_text):
-    rkw, jkw = extract_keywords(resume_text), extract_keywords(jd_text)
-    kw_score   = len(rkw & jkw) / len(jkw) if jkw else 0.5
-    tf_score   = tfidf_similarity(resume_text, jd_text)
-    jd_lower, r_lower = jd_text.lower(), resume_text.lower()
-    jd_skills  = {s for s in TECH_SKILLS if s in jd_lower}
-    r_skills   = {s for s in TECH_SKILLS if s in r_lower}
-    sk_score   = len(r_skills & jd_skills) / len(jd_skills) if jd_skills else 1.0
-    total      = min(int((kw_score * 0.4 + tf_score * 0.4 + sk_score * 0.2) * 100), 99)
+    rkw = extract_keywords(resume_text)
+    jkw = extract_keywords(jd_text)
+
+    kw_score  = len(rkw & jkw) / len(jkw) if jkw else 0.5
+    tf_score  = tfidf_similarity(resume_text, jd_text)
+
+    jd_lower  = jd_text.lower()
+    r_lower   = resume_text.lower()
+    jd_skills = {s for s in TECH_SKILLS if s in jd_lower}
+    r_skills  = {s for s in TECH_SKILLS if s in r_lower}
+    sk_score  = len(r_skills & jd_skills) / len(jd_skills) if jd_skills else 1.0
+
+    total = min(int((kw_score * 0.4 + tf_score * 0.4 + sk_score * 0.2) * 100), 99)
+
     missing_tech    = [s for s in jd_skills if s not in r_skills]
-    missing_general = [k for k in list(jkw) if k not in rkw and k not in TECH_SKILLS][:10]
+    missing_general = [k for k in list(jkw) if k not in rkw and k not in TECH_SKILLS
+                       and len(k) > 4 and " " not in k][:10]
+
     return {
-        "score": total,
-        "keyword_match":    round(kw_score * 100),
-        "content_similarity": round(tf_score * 100),
-        "skills_coverage":  round(sk_score * 100),
-        "matched_keywords": list(rkw & jkw)[:15],
-        "missing_keywords": missing_tech[:8] + missing_general[:max(0, 12 - len(missing_tech))],
+        "score":               total,
+        "keyword_match":       round(kw_score * 100),
+        "content_similarity":  round(tf_score * 100),
+        "skills_coverage":     round(sk_score * 100),
+        "matched_keywords":    list(rkw & jkw)[:15],
+        "missing_keywords":    missing_tech[:8] + missing_general[:max(0, 12 - len(missing_tech))],
     }
 
 def generate_suggestions(sd, resume_text, jd_text):
@@ -329,8 +353,5 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
     print(f"[CareerAI] Starting on port {port}")
     print(f"[CareerAI] HF token: {'SET' if HF_TOKEN else 'NOT SET — image features will fail'}")
-    # Pre-load spaCy on startup to avoid cold start on first ATS request
-    print("[CareerAI] Loading spaCy model...")
-    get_nlp()
-    print("[CareerAI] Ready.")
+    print("[CareerAI] Ready — no model preload needed.")
     app.run(host="0.0.0.0", port=port, debug=False)
