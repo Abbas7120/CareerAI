@@ -20,14 +20,6 @@ const tools = [
     gradient: "linear-gradient(135deg, hsl(172 66% 50%), hsl(190 80% 45%))",
   },
   {
-    title: "ATS Resume Checker",
-    description:
-      "Analyze your resume against ATS rules. Get a score and actionable suggestions to improve keywords and formatting.",
-    icon: ScanSearch,
-    href: "/dashboard/ats-checker",
-    gradient: "linear-gradient(135deg, hsl(262 83% 58%), hsl(280 70% 55%))",
-  },
-  {
     title: "Background Removal",
     description:
       "Upload any photo and instantly remove the background for clean, professional images perfect for resumes and profiles.",
@@ -58,6 +50,14 @@ const tools = [
     icon: Camera,
     href: "/dashboard/headshot-generator",
     gradient: "linear-gradient(135deg, hsl(150 60% 45%), hsl(172 66% 50%))",
+  },
+  {
+    title: "ATS Resume Checker",
+    description:
+      "Analyze your resume against ATS rules. Get a score and actionable suggestions to improve keywords and formatting.",
+    icon: ScanSearch,
+    href: "/dashboard/ats-checker",
+    gradient: "linear-gradient(135deg, hsl(262 83% 58%), hsl(280 70% 55%))",
   },
 ];
 
