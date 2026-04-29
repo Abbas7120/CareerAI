@@ -1,6 +1,6 @@
-flask==3.0.3
-flask-cors==4.0.1
-requests==2.31.0
-pillow==10.3.0
-spacy==3.7.5
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+flask==3.1.0
+flask-cors==5.0.0
+requests==2.32.3
+pillow==11.2.1
+spacy==3.8.4
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
