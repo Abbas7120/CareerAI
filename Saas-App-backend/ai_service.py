@@ -74,28 +74,27 @@ def remove_bg():
             raw = raw.split(",", 1)[1]
         img_bytes = base64.b64decode(raw)
 
-        # Resize before sending
+        # Resize to max 1024px before sending to save bandwidth & avoid HF limits
         pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-        pil.thumbnail((1024, 1024), Image.LANCZOS)
+        MAX = 1024
+        if max(pil.size) > MAX:
+            pil.thumbnail((MAX, MAX), Image.LANCZOS)
         buf = io.BytesIO()
         pil.save(buf, format="JPEG", quality=90)
         buf.seek(0)
         resized_bytes = buf.read()
 
-        # Get PNG bytes back from remove.bg
         result_bytes = call_hf_remove_bg(resized_bytes)
 
-        # ── THIS IS THE CRITICAL PART ──
-        # Convert raw PNG bytes → base64 string for frontend
         result_b64 = base64.b64encode(result_bytes).decode("utf-8")
-
         return jsonify({
             "success": True,
-            "image": f"data:image/png;base64,{result_b64}",  # must have this prefix
+            "image": f"data:image/png;base64,{result_b64}",
         })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FEATURE 2 — ATS CHECKER  (local spaCy NLP — lightweight, no GPU needed)
@@ -258,29 +257,29 @@ BG_COLORS = {
 }
 
 def enhance_and_composite(subject_png_bytes: bytes, style: str, orig_size: tuple) -> bytes:
-    """Enhance subject and paste onto chosen background colour."""
     subject = Image.open(io.BytesIO(subject_png_bytes)).convert("RGBA")
 
-    # Resize to portrait dimensions
     W, H = 500, 600
     subject = subject.resize((W, H), Image.LANCZOS)
 
-    # Enhance with PIL
+    # Enhance
     rgb = subject.convert("RGB")
     rgb = ImageEnhance.Brightness(rgb).enhance(1.06)
     rgb = ImageEnhance.Contrast(rgb).enhance(1.12)
     rgb = ImageEnhance.Color(rgb).enhance(1.08)
     rgb = ImageEnhance.Sharpness(rgb).enhance(1.5)
-    subject.paste(rgb, mask=subject.split()[3])   # keep alpha
+    subject.paste(rgb, mask=subject.split()[3])
 
-    # Background
+    # Background — pure PIL, no numpy
     if style == "gradient_blue":
-        import numpy as np
-        arr = np.zeros((H, W, 3), dtype=np.uint8)
+        bg = Image.new("RGBA", (W, H))
         for row in range(H):
             t = row / H
-            arr[row] = [int((1-t)*10+t*30), int((1-t)*60+t*100), int((1-t)*140+t*180)]
-        bg = Image.fromarray(arr, "RGB").convert("RGBA")
+            r = int((1 - t) * 10 + t * 30)
+            g = int((1 - t) * 60 + t * 100)
+            b = int((1 - t) * 140 + t * 180)
+            for col in range(W):
+                bg.putpixel((col, row), (r, g, b, 255))
     else:
         color = BG_COLORS.get(style, BG_COLORS["professional"])
         bg = Image.new("RGBA", (W, H), (*color, 255))
@@ -291,7 +290,6 @@ def enhance_and_composite(subject_png_bytes: bytes, style: str, orig_size: tuple
     composite.convert("RGB").save(out, format="JPEG", quality=92, optimize=True)
     out.seek(0)
     return out.read()
-
 
 @app.route("/api/headshot", methods=["POST"])
 def headshot():
