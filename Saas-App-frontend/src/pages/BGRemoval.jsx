@@ -37,7 +37,7 @@ export default function BGRemoval() {
     handleFile(e.dataTransfer.files[0]);
   };
 
-const processImage = async () => {
+  const processImage = async () => {
   if (!originalImage) return;
   setLoading(true);
   setError(null);
@@ -68,11 +68,11 @@ const processImage = async () => {
       body: formData,
     });
 
-    // ✅ CORRECT — parse as JSON, then use data.image directly
+   
     const data = await res.json();
     if (!res.ok || !data.success) throw new Error(data.error || "Processing failed");
 
-    setResultImage(data.image); // data.image is already "data:image/png;base64,..."
+    setResultImage(data.image);
 
   } catch (err) {
     setError(err.message);
@@ -80,6 +80,49 @@ const processImage = async () => {
     setLoading(false);
   }
 };
+// const processImage = async () => {
+//   if (!originalImage) return;
+//   setLoading(true);
+//   setError(null);
+
+//   try {
+//     const canvas = document.createElement("canvas");
+//     const img = new Image();
+//     img.src = originalImage.src;
+//     await new Promise(r => (img.onload = r));
+
+//     const MAX = 1024;
+//     let w = img.width, h = img.height;
+//     if (w > MAX || h > MAX) {
+//       if (w > h) { h = Math.round((h * MAX) / w); w = MAX; }
+//       else { w = Math.round((w * MAX) / h); h = MAX; }
+//     }
+
+//     canvas.width = w;
+//     canvas.height = h;
+//     canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+
+//     const uploadBlob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.85));
+//     const formData = new FormData();
+//     formData.append("image", uploadBlob, "image.jpg");
+
+//     const res = await fetch(`${API_BASE}/api/image/remove-bg`, {
+//       method: "POST",
+//       body: formData,
+//     });
+
+//     // ✅ CORRECT — parse as JSON, then use data.image directly
+//     const data = await res.json();
+//     if (!res.ok || !data.success) throw new Error(data.error || "Processing failed");
+
+//     setResultImage(data.image); // data.image is already "data:image/png;base64,..."
+
+//   } catch (err) {
+//     setError(err.message);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
   const downloadResult = () => {
     if (!resultImage) return;
