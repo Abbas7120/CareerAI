@@ -46,30 +46,21 @@ def get_nlp():
 
 HF_RMBG_URL = "https://router.huggingface.co/hf-inference/models/briaai/RMBG-1.4"
 
+# Add this env variable at the top with your other env vars
+REMOVE_BG_KEY = os.environ.get("REMOVE_BG_API_KEY", "")
+
 def call_hf_remove_bg(image_bytes: bytes) -> bytes:
-    """Send image bytes to HF RMBG-1.4, get back PNG bytes with transparency."""
+    """Uses remove.bg API — 50 free calls/month, no credit card needed."""
     response = requests.post(
-        HF_RMBG_URL,
-        headers={**HF_HEADERS, "Content-Type": "image/jpeg"},
-        data=image_bytes,
+        "https://api.remove.bg/v1.0/removebg",
+        files={"image_file": ("image.jpg", image_bytes, "image/jpeg")},
+        data={"size": "auto"},
+        headers={"X-Api-Key": REMOVE_BG_KEY},
         timeout=60,
     )
     if response.status_code == 200:
-        return response.content          # PNG bytes returned by the model
-    # Model loading (503) — wait and retry once
-    if response.status_code == 503:
-        import time
-        time.sleep(20)
-        response = requests.post(
-            HF_RMBG_URL,
-            headers={**HF_HEADERS, "Content-Type": "image/jpeg"},
-            data=image_bytes,
-            timeout=90,
-        )
-        if response.status_code == 200:
-            return response.content
-    raise Exception(f"HF BG removal failed ({response.status_code}): {response.text[:200]}")
-
+        return response.content  # returns PNG bytes directly
+    raise Exception(f"remove.bg failed ({response.status_code}): {response.text[:200]}")
 
 @app.route("/api/remove-bg", methods=["POST"])
 def remove_bg():
