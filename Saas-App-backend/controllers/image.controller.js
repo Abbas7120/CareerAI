@@ -24,19 +24,30 @@ function bufferToDataUri(buffer, mimetype) {
 }
 
 // ─── Background Removal ───────────────────────────────────────────────────────
-exports.removeBackground = async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "Please upload an image file" });
-
+exports.removeBackground=async(req,res)=>{
+    try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Please upload an image file" });
+    }
+ 
     const imageDataUri = bufferToDataUri(req.file.buffer, req.file.mimetype);
+ 
     const result = await callAiService("/api/remove-bg", { image: imageDataUri });
-
-    return res.json({ success: true, image: result.image, message: "Background removed successfully" });
+ 
+    return res.json({
+      success: true,
+      image: result.image,   // transparent PNG as data URI
+      message: "Background removed successfully",
+    });
+ 
   } catch (err) {
     console.error("[remove-bg]", err.message);
-    return res.status(500).json({ error: "Background removal failed", detail: err.message });
+    return res.status(500).json({
+      error: "Background removal failed",
+      detail: err.message,
+    });
   }
-};
+}
 
 // ─── Headshot Generator ───────────────────────────────────────────────────────
 exports.generateHeadshot = async (req, res) => {
