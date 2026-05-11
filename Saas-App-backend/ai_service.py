@@ -62,7 +62,7 @@ def call_hf_remove_bg(image_bytes: bytes) -> bytes:
         return response.content  # returns PNG bytes directly
     raise Exception(f"remove.bg failed ({response.status_code}): {response.text[:200]}")
 
-@app.route("/api/remove-bg", methods=["POST"])
+@app.route("/api/image/remove-bg", methods=["POST"])
 def remove_bg():
     try:
         data = request.get_json()
