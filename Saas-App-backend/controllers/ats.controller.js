@@ -1,5 +1,5 @@
 //const fetch = require("node-fetch");
-
+const db = require("../config/mysql");
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "https://careerai-1-lwj8.onrender.com";
 
 async function callAiService(endpoint, payload) {
@@ -91,6 +91,26 @@ exports.analyzeResume = async (req, res) => {
       resume: resumeText,
       jobDescription: jobDescription.trim(),
     });
+try{
+      await db.query(
+        `INSERT INTO ats_analysis 
+        (resume_content, job_description, score, match_summary, missing_keywords, action_items)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          resumeText,
+          jobDescription,
+          result.score || 0,
+          JSON.stringify(result.breakdown || {}),
+          (result.missingKeywords || []).join(", "),
+          (result.suggestions || []).join(", "),
+        ]
+      );
+
+      console.log("ATS analysis saved to DB");
+    } catch (dbErr) {
+      console.error("DB save failed:", dbErr.message);
+    }
+
 
     return res.json({
       success: true,

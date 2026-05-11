@@ -33,6 +33,7 @@
 
 const { generateWithMistral } = require("../services/mistral.service")
 const { generateWithGemini } = require("../services/gemini.service")
+const db = require("../config/mysql");
 
 exports.generatePost = async (req, res) => {
   const { topic, tone, contentType } = req.body
@@ -66,5 +67,19 @@ Now write the post:
     .replace(/^(your (linkedin )?post|the post)[^\n]*\n?/gi, "")
     .trim()
 
-  res.json({ post })
+    try {
+    await db.query(
+      `INSERT INTO linkedin_posts 
+      (topic, content_type, tone, post_content, hashtags)
+      VALUES (?, ?, ?, ?, ?)`,
+      [topic, contentType, tone, post, hashtags]
+    );
+
+    console.log("LinkedIn post saved to DB");
+  } catch (dbErr) {
+    console.error("DB save failed:", dbErr.message);
+  }
+
+
+ return  res.json({ post })
 }

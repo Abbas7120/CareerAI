@@ -30,7 +30,7 @@
 
 const { generateWithMistral } = require("../services/mistral.service")
 const { generateWithGemini } = require("../services/gemini.service")
-
+const db = require("../config/mysql");
 exports.generateBio = async (req, res) => {
   const { fullName, targetRole, keySkills, experience, careerGoals, tone } = req.body
 
@@ -61,6 +61,25 @@ Now write the bio:
     console.warn("[Bio] Mistral failed:", mistralErr.message, "— switching to Gemini")
     bio = await generateWithGemini(prompt)
   }
+try {
+    await db.query(
+      `INSERT INTO profile_bios 
+      (full_name, target_role, key_skills, experience, career_goals, tone, bio_option_1)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        fullName,
+        targetRole,
+        keySkills,
+        experience,
+        careerGoals,
+        tone,
+        finalBio
+      ]
+    );
 
+    console.log("Bio saved to DB");
+  } catch (dbErr) {
+    console.error("DB save failed:", dbErr.message);
+  }
   res.json({ bio: bio.trim() })
 }
