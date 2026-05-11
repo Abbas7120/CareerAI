@@ -13,6 +13,7 @@ import ResumeBuilder from "./pages/ResumeBuilder";
 import { Toaster } from "react-hot-toast";
 import NotFound from "./pages/NotFond";
 import Navbar from "./components/Navbar";
+import History from "./pages/History";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/history" element={<History/>}/>
         <Route path="/dashboard/resume-builder" element={<ResumeBuilder />} />
         <Route path="/dashboard/ats-checker" element={<ATSChecker />} />
         <Route path="/dashboard/bg-removal" element={<BGRemoval />} />
