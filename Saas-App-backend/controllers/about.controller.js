@@ -61,6 +61,7 @@ Now write the bio:
     console.warn("[Bio] Mistral failed:", mistralErr.message, "— switching to Gemini")
     bio = await generateWithGemini(prompt)
   }
+   if (clerkUserId) {
 try {
     await db.query(
       `INSERT INTO profile_bios 
@@ -81,5 +82,5 @@ try {
   } catch (dbErr) {
     console.error("DB save failed:", dbErr.message);
   }
-  res.json({ bio: bio.trim() })
+  res.json({ bio: bio.trim() })}
 }

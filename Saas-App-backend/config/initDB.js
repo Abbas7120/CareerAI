@@ -1,7 +1,19 @@
 const db = require("./mysql")
 
 async function initDB(){
-
+    await db.query(`
+CREATE TABLE IF NOT EXISTS user_outputs (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  clerk_user_id VARCHAR(255) NOT NULL,
+  email         VARCHAR(255),
+  feature       VARCHAR(50) NOT NULL,
+  input_summary TEXT,
+  output        LONGTEXT NOT NULL,
+  created_at    DATETIME DEFAULT NOW(),
+  INDEX idx_user    (clerk_user_id),
+  INDEX idx_feature (feature)
+)
+  `)
 await db.query(`
 CREATE TABLE IF NOT EXISTS resumes(
 id INT AUTO_INCREMENT PRIMARY KEY,
