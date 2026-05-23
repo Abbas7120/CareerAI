@@ -32,7 +32,7 @@ exports.removeBackground=async(req,res)=>{
  
     const imageDataUri = bufferToDataUri(req.file.buffer, req.file.mimetype);
  
-    const result = await callAiService("/api/remove-bg", { image: imageDataUri });
+    const result = await callAiService("/api/image/remove-bg", { image: imageDataUri });
  
     return res.json({
       success: true,
