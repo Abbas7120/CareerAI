@@ -12,6 +12,8 @@ const atsRoutes = require("./routes/ats.routes")
 const linkedinRoutes = require("./routes/linkedin.routes")
 const aboutRoutes = require("./routes/about.routes")
 const imageRoutes = require("./routes/image.routes")
+const dashboardRoutes = require("./routes/dashboard.routes");
+
 const app = express()
 
 app.use(cors({origin: "*"}))
@@ -22,7 +24,7 @@ app.use("/api/ats",atsRoutes)
 app.use("/api/linkedin",linkedinRoutes)
 app.use("/api/about",aboutRoutes)
 app.use("/api/image",imageRoutes)
-
+app.use("/api/dashboard", dashboardRoutes);
 
 //app.use("/api/ai",aiRoutes)
 async function start(){
