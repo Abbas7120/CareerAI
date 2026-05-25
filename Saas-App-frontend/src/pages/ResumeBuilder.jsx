@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
+import { useUser } from "@clerk/clerk-react";
 const API_BASE = import.meta.env.VITE_API_URL;
 const btn =
   "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
@@ -477,6 +477,7 @@ export default function ResumeBuilder() {
 // Then replace ONLY the generateResume function with this:
 
 const generateResume = async () => {
+   const { user, isSignedIn } = useUser();
   if (!form.fullName || !form.email || !form.education || !form.skills) {
     setError("Please fill: Name, Email, Education and Skills");
     return;
