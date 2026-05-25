@@ -1,6 +1,33 @@
 import { useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 
+import { useEffect,useState } from "react";
+const TrustedUsers = () => {
+  const [count, setCount] = useState(10000);
+
+  useEffect(() => {
+    // Get previous visitors from localStorage
+    const hasVisited = localStorage.getItem("visited");
+
+    // If user is visiting first time
+    if (!hasVisited) {
+      const currentCount =
+        Number(localStorage.getItem("userCount")) || 10000;
+
+      const newCount = currentCount + 1;
+
+      localStorage.setItem("userCount", newCount);
+      localStorage.setItem("visited", "true");
+
+      setCount(newCount);
+    } else {
+      // Existing visitor
+      const savedCount =
+        Number(localStorage.getItem("userCount")) || 10000;
+
+      setCount(savedCount);
+    }
+  }, []);}
 const Hero = () => {
   const navigate = useNavigate();
 
@@ -34,7 +61,7 @@ const Hero = () => {
       {/* Trusted Section */}
       <div className="flex items-center gap-4 mt-8 mx-auto text-gray-600">
         <img src={assets.user_group} alt="users" className="h-8" /> Trusted by
-        10k+ people
+        {count}+ people
       </div>
 
       {/* Logos Marquee */}

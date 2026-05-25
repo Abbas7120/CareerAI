@@ -467,30 +467,48 @@ export default function ResumeBuilder() {
 
   const templateConfig = TEMPLATES.find((t) => t.id === template) || TEMPLATES[0];
 
-  const generateResume = async () => {
-    if (!form.fullName || !form.email || !form.education || !form.skills) {
-      setError("Please fill: Name, Email, Education and Skills");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/api/resumes/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, templateId: template }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setGenerated(data);
-      if (data.enhanced) setEnhanced(data.enhanced);
-      setStep(5);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ResumeBuilder.jsx — ONLY THE generateResume FUNCTION CHANGES
+// Add this import at the top of your existing ResumeBuilder.jsx:
+//   import { useUser } from "@clerk/clerk-react";
+//
+// Add this inside the ResumeBuilder component (alongside existing useState hooks):
+//   const { user, isSignedIn } = useUser();
+//
+// Then replace ONLY the generateResume function with this:
+
+const generateResume = async () => {
+  if (!form.fullName || !form.email || !form.education || !form.skills) {
+    setError("Please fill: Name, Email, Education and Skills");
+    return;
+  }
+  setLoading(true);
+  setError(null);
+  try {
+    const res = await fetch(`${API_BASE}/api/resumes/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        templateId: template,
+        // ── history fields ──
+        clerkUserId: isSignedIn ? user.id : null,
+        email:       isSignedIn ? user.primaryEmailAddress?.emailAddress : null,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setGenerated(data);
+    if (data.enhanced) setEnhanced(data.enhanced);
+    setStep(5);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Everything else in ResumeBuilder.jsx stays EXACTLY the same.
+// No other changes needed.
 
   const downloadPDF = () => {
     const el = previewRef.current;
