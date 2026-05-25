@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-
+ import { useUser } from "@clerk/clerk-react";
 const API_BASE = import.meta.env.VITE_API_URL;
 const btn =
   "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
@@ -469,12 +469,13 @@ export default function ResumeBuilder() {
 
   // ResumeBuilder.jsx — ONLY THE generateResume FUNCTION CHANGES
 // Add this import at the top of your existing ResumeBuilder.jsx:
-//   import { useUser } from "@clerk/clerk-react";
+//  
 //
 // Add this inside the ResumeBuilder component (alongside existing useState hooks):
 //   const { user, isSignedIn } = useUser();
 //
 // Then replace ONLY the generateResume function with this:
+ const { user, isSignedIn } = useUser();
 
 const generateResume = async () => {
   if (!form.fullName || !form.email || !form.education || !form.skills) {
@@ -491,7 +492,7 @@ const generateResume = async () => {
         ...form,
         templateId: template,
         // ── history fields ──
-        clerkUserId: isSignedIn ? user.id : null,
+          clerkUserId: isSignedIn ? user.id : null,
         email:       isSignedIn ? user.primaryEmailAddress?.emailAddress : null,
       }),
     });
