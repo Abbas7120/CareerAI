@@ -59,7 +59,7 @@ async function generateResumeContent(data, templateId) {
   const {
     fullName, email, phone, linkedin, portfolio,
     education, skills, summary, experience,
-    achievements, extracurricular, clerkUserId, email
+    achievements, extracurricular
   } = data;
 
   const prompt = `You are an expert resume writer. Generate a complete, professional resume using the data below.
