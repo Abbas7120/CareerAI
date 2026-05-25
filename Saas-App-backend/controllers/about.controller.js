@@ -32,8 +32,11 @@ const { generateWithMistral } = require("../services/mistral.service")
 const { generateWithGemini } = require("../services/gemini.service")
 const db = require("../config/mysql");
 exports.generateBio = async (req, res) => {
-  const { fullName, targetRole, keySkills, experience, careerGoals, tone } = req.body
-
+const {
+    fullName, targetRole, keySkills,
+    experience, careerGoals, tone,
+    clerkUserId, email,          
+  } = req.body;
   const prompt = `You are a professional LinkedIn profile writer. Write a LinkedIn About section for this person.
 
 Name: ${fullName}
@@ -54,33 +57,35 @@ Now write the bio:
 
   let bio = ""
 
-  try {
-    console.log("[Bio] Trying Mistral...")
-    bio = await generateWithMistral(prompt)
+ try {
+    console.log("[Bio] Trying Mistral...");
+    bio = await generateWithMistral(prompt);
   } catch (mistralErr) {
-    console.warn("[Bio] Mistral failed:", mistralErr.message, "— switching to Gemini")
-    bio = await generateWithGemini(prompt)
+    console.warn("[Bio] Mistral failed:", mistralErr.message, "— switching to Gemini");
+    bio = await generateWithGemini(prompt);
   }
-   if (clerkUserId) {
-try {
-    await db.query(
-      `INSERT INTO profile_bios 
-      (full_name, target_role, key_skills, experience, career_goals, tone, bio_option_1)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        fullName,
-        targetRole,
-        keySkills,
-        experience,
-        careerGoals,
-        tone,
-        finalBio
-      ]
-    );
-
-    console.log("Bio saved to DB");
-  } catch (dbErr) {
-    console.error("DB save failed:", dbErr.message);
+ 
+  const finalBio = bio.trim();
+ 
+  // ── Save to user_outputs (only if signed in) ─────────────────────────────
+  if (clerkUserId) {
+    try {
+      await db.query(
+        `INSERT INTO user_outputs (clerk_user_id, email, feature, input_summary, output, created_at)
+         VALUES (?, ?, ?, ?, ?, NOW())`,
+        [
+          clerkUserId,
+          email || "",
+          "about",
+          `About for: ${fullName}${targetRole ? " — " + targetRole : ""}`,
+          finalBio,
+        ]
+      );
+    } catch (dbErr) {
+      console.warn("[about] History save failed (non-critical):", dbErr.message);
+    }
   }
-  res.json({ bio: bio.trim() })}
-}
+ 
+  return res.json({ bio: finalBio });
+};
+ 
