@@ -58,8 +58,7 @@ function buildResumeText({ education, experience, skills }) {
 
 exports.analyzeResume = async (req, res) => {
   try {
-     const { education, experience, skills, jobDescription, clerkUserId, email } = req.body;
-
+    const { education, experience, skills, jobDescription } = req.body;
 
     // ── Validation ──────────────────────────────
     if (!jobDescription || jobDescription.trim().length < 30) {
